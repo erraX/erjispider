@@ -13,4 +13,7 @@ class TopicItem(scrapy.Item):
     url = scrapy.Field()
 
 class DetailItem(scrapy.Item):
-    pass
+    name = scrapy.Field()
+    postedTime = scrapy.Field()
+    floor = scrapy.Field()
+    content = scrapy.Field()
