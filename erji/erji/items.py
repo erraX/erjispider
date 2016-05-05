@@ -9,11 +9,13 @@ import scrapy
 
 
 class TopicItem(scrapy.Item):
+    id = scrapy.Field()
+    lastUpdateTime = scrapy.Field()
     topic = scrapy.Field()
-    url = scrapy.Field()
 
 class DetailItem(scrapy.Item):
     name = scrapy.Field()
     postedTime = scrapy.Field()
     floor = scrapy.Field()
     content = scrapy.Field()
+    id = scrapy.Field()

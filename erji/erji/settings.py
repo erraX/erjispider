@@ -15,7 +15,13 @@ SPIDER_MODULES = ['erji.spiders']
 NEWSPIDER_MODULE = 'erji.spiders'
 
 LOG_LEVEL = 'DEBUG'
+# LOG_LEVEL = 'INFO'
 
+
+ITEM_PIPELINES = ['erji.pipelines.ErjiPipeline', ]
+MONGODB_SERVER = "localhost"
+MONGODB_PORT = 27017
+MONGODB_DB = "erji"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'erji (+http://www.yourdomain.com)'
