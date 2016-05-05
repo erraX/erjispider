@@ -14,8 +14,8 @@ BOT_NAME = 'erji'
 SPIDER_MODULES = ['erji.spiders']
 NEWSPIDER_MODULE = 'erji.spiders'
 
-LOG_LEVEL = 'DEBUG'
-# LOG_LEVEL = 'INFO'
+# LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 
 
 ITEM_PIPELINES = ['erji.pipelines.ErjiPipeline', ]

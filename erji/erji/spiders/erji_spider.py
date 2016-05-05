@@ -4,11 +4,14 @@ import scrapy
 import json
 import codecs
 import urlparse
+import datetime
 
 from erji.items import TopicItem
 from erji.items import DetailItem
 from scrapy.http.request import Request
 
+def convertDate(dateStr):
+    return datetime.datetime.strptime(dateStr, '%Y-%m-%d %H:%M')
 
 def getQueryParams(url):
     '''
@@ -82,15 +85,20 @@ class ErjiSpider(scrapy.Spider):
             # 楼主/层主
             name = box.xpath('./tr[1]/th[1]/b/text()').extract_first().encode('UTF8')
             postedTime = box.xpath('./tr[2]/th/div/text()').extract_first().encode('UTF8').strip()[8:-2].replace('Posted: ', '')
-            floor = box.xpath('./tr[2]/th/div/span[2]/a/text()').extract_first().encode('UTF8').replace('楼', '').strip()
+            floor = box.xpath('./tr[2]/th/div/span[2]/a/text()').extract_first().encode('UTF8').strip()
+
+            if '楼 主' in floor:
+                floor = 0
+            else:
+                floor = floor.replace('楼', '').strip()
 
             # 回帖内容lastPageUrl
             content = box.xpath('./tr[1]/th[2]/div[@class="tpc_content"]').extract_first().encode('utf8')
 
             item = DetailItem()
             item['name'] = name
-            item['postedTime'] = postedTime
-            item['floor'] = floor
+            item['postedTime'] = convertDate(postedTime)
+            item['floor'] = int(floor)
             item['content'] = content
             item['id'] = id
 
@@ -107,7 +115,7 @@ class ErjiSpider(scrapy.Spider):
             item = TopicItem()
             item['id'] = id
             item['topic'] = topic[0]
-            item['lastUpdateTime'] = topic[2]
+            item['lastUpdateTime'] = convertDate(topic[2])
 
             yield item
 
