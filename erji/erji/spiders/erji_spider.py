@@ -5,6 +5,7 @@ import json
 import codecs
 import urlparse
 import datetime
+import time
 
 from erji.items import TopicItem
 from erji.items import DetailItem
@@ -12,6 +13,9 @@ from scrapy.http.request import Request
 
 def convertDate(dateStr):
     return datetime.datetime.strptime(dateStr, '%Y-%m-%d %H:%M')
+
+def convertTimestamp(dataStr):
+    return time.mktime(convertDate(dataStr).timetuple())
 
 def getQueryParams(url):
     '''
@@ -37,12 +41,16 @@ class ErjiSpider(scrapy.Spider):
             解析每个帖子的URL和名字
         '''
         result = []
-        topicNodes = response.xpath('//tr[@class="tr3 t_one"]/td[2]/a[starts-with(@href, "read.php")]')
+        topicNodes = response.xpath('//tr[@class="tr3 t_one"]')
+        # topicNodes = response.xpath('//tr[@class="tr3 t_one"]/td[2]/a[starts-with(@href, "read.php")]')
 
         for topic in topicNodes:
-            title = topic.xpath('.//text()').extract_first().encode("utf8")
-            href = topic.xpath('./@href').extract_first().encode("utf8")
-            lastUpdateTime = response.xpath('//tr[@class="tr3 t_one"]/td[6]/a[starts-with(@href, "read.php")]/text()').extract_first().encode("utf8").strip()
+            titleNode = topic.xpath('./td[2]/a[starts-with(@href, "read.php")]')
+            title = titleNode.xpath('.//text()').extract_first().encode("utf8")
+            href = titleNode.xpath('./@href').extract_first().encode("utf8")
+            lastUpdateTime = topic.xpath('./td[6]/a[starts-with(@href, "read.php")]/text()').extract_first().encode("utf8").strip()
+
+
             result.append([title, href, lastUpdateTime])
         return result
 
@@ -116,6 +124,9 @@ class ErjiSpider(scrapy.Spider):
             item['id'] = id
             item['topic'] = topic[0]
             item['lastUpdateTime'] = convertDate(topic[2])
+            # item['lastUpdateTime'] = convertTimestamp(topic[2])
+
+            # print convertDatj(topic[2])
 
             yield item
 
