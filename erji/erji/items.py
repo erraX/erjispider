@@ -12,6 +12,8 @@ class TopicItem(scrapy.Item):
     id = scrapy.Field()
     lastUpdateTime = scrapy.Field()
     topic = scrapy.Field()
+    author = scrapy.Field()
+    answer = scrapy.Field()
 
 class DetailItem(scrapy.Item):
     name = scrapy.Field()

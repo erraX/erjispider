@@ -7,9 +7,10 @@ import urlparse
 import datetime
 import time
 
+from bs4 import BeautifulSoup
+from scrapy.http.request import Request
 from erji.items import TopicItem
 from erji.items import DetailItem
-from scrapy.http.request import Request
 
 def convertDate(dateStr):
     return datetime.datetime.strptime(dateStr, '%Y-%m-%d %H:%M')
@@ -28,7 +29,7 @@ def getQueryParams(url):
 class ErjiSpider(scrapy.Spider):
     name = "erji"
     allowed_domains = ["www.erji.net"]
-    totalPages = 1
+    totalPages = 5
 
     def __init__(self, *a, **kw):
         super(ErjiSpider, self).__init__(*a, **kw)
@@ -46,12 +47,13 @@ class ErjiSpider(scrapy.Spider):
 
         for topic in topicNodes:
             titleNode = topic.xpath('./td[2]/a[starts-with(@href, "read.php")]')
+            author = topic.xpath('./td[3]/a/text()').extract_first().encode('UTF8').strip()
+            answer = topic.xpath('./td[4]/text()').extract_first().strip()
             title = titleNode.xpath('.//text()').extract_first().encode("utf8")
             href = titleNode.xpath('./@href').extract_first().encode("utf8")
             lastUpdateTime = topic.xpath('./td[6]/a[starts-with(@href, "read.php")]/text()').extract_first().encode("utf8").strip()
+            result.append([title, href, answer, author, lastUpdateTime])
 
-
-            result.append([title, href, lastUpdateTime])
         return result
 
     def parseDetailPages(self, response):
@@ -103,11 +105,34 @@ class ErjiSpider(scrapy.Spider):
             # 回帖内容lastPageUrl
             content = box.xpath('./tr[1]/th[2]/div[@class="tpc_content"]').extract_first().encode('utf8')
 
+            soup = BeautifulSoup(content, 'html.parser')
+
+            for img in soup.findAll('img'):
+                src = img['src']
+
+                if src.startswith('image/post'):
+                    # img['src'] = 'http://www.erji.net/' + src
+                    img.extract()
+
+                # if src.startswith('http://www.erji.net/') or src.startswith('http://www.erji.net/'):
+                if 'erji.net' in src:
+                    wrappedTag = soup.new_tag('p')
+                    wrappedTag['class'] = 'image'
+                    newTag = soup.new_tag('a')
+                    newTag.string = src
+                    newTag['href'] = src
+                    img.wrap(wrappedTag)
+                    wrappedTag.img.replace_with(newTag)
+                    # print soup.prettify()
+
+
+            # print soup.prettify()
+
             item = DetailItem()
             item['name'] = name
             item['postedTime'] = convertDate(postedTime)
             item['floor'] = int(floor)
-            item['content'] = content
+            item['content'] = str(soup)
             item['id'] = id
 
             yield item
@@ -123,10 +148,10 @@ class ErjiSpider(scrapy.Spider):
             item = TopicItem()
             item['id'] = id
             item['topic'] = topic[0]
-            item['lastUpdateTime'] = convertDate(topic[2])
+            item['answer'] = topic[2]
+            item['author'] = topic[3]
+            item['lastUpdateTime'] = convertDate(topic[4])
             # item['lastUpdateTime'] = convertTimestamp(topic[2])
-
-            # print convertDatj(topic[2])
 
             yield item
 

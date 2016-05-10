@@ -17,9 +17,11 @@ NEWSPIDER_MODULE = 'erji.spiders'
 # LOG_LEVEL = 'DEBUG'
 LOG_LEVEL = 'INFO'
 
+# LOG_FILE='erji_scrapy.log'
+
 
 ITEM_PIPELINES = ['erji.pipelines.ErjiPipeline', ]
-MONGODB_SERVER = "localhost"
+MONGODB_SERVER = "127.0.0.1"
 MONGODB_PORT = 27017
 MONGODB_DB = "erji"
 
