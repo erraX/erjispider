@@ -29,13 +29,20 @@ def getQueryParams(url):
 class ErjiSpider(scrapy.Spider):
     name = "erji"
     allowed_domains = ["www.erji.net"]
-    totalPages = 5
+    totalPages = 1
 
     def __init__(self, *a, **kw):
         super(ErjiSpider, self).__init__(*a, **kw)
         baseUrl = "http://www.erji.net/thread.php?fid=23&search=&page=";
         # 一共要抓多少页
-        self.start_urls = [baseUrl + str(i) for i in range(1, self.totalPages + 1)]
+        # self.start_urls = [baseUrl + str(i) for i in range(1, self.totalPages + 1)]
+
+        self.start_urls = [
+            'http://www.erji.net/thread.php?fid=2&search=&page=1',
+            'http://www.erji.net/thread.php?fid=2&search=&page=2',
+            'http://www.erji.net/thread.php?fid=23&search=&page=1',
+            'http://www.erji.net/thread.php?fid=142&search=&page=1',
+        ]
 
     def parseTopics(self, response):
         '''
